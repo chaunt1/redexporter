@@ -1,0 +1,149 @@
+<div class="contextual">
+  <%= link_to t('exporter.labels.view_documentation'), 
+      'https://github.com/chaunt1/redexporter', 
+      class: 'icon icon-help', 
+      target: '_blank' %>
+</div>
+
+<h2><%= t('exporter.labels.settings_title') %></h2>
+
+<%= form_tag({ action: :save }, method: :post) do %>
+  <div class="box tabular settings">
+    <h3><%= t('exporter.labels.general_settings') %></h3>
+    
+    <!-- Enable/Disable Plugin -->
+    <p>
+      <label><%= t('exporter.labels.enabled') %></label>
+      <%= check_box_tag 'settings[exporter_enabled]', 
+                        '1',
+                        @settings['exporter_enabled'] == true || 
+                        @settings['exporter_enabled'] == 'on' || 
+                        @settings['exporter_enabled'] == '1' %>
+      <em class="info"><%= t('exporter.help.enabled') %></em>
+    </p>
+
+    <!-- Authentication Token -->
+    <p>
+      <label><%= t('exporter.labels.token') %></label>
+      <%= text_field_tag 'settings[exporter_prometheus_token]',
+                         @settings['exporter_prometheus_token'],
+                         size: 65,
+                         readonly: true,
+                         id: 'exporter_token_field',
+                         class: 'monospace' %>
+      <%= button_tag t('exporter.buttons.regenerate_token'),
+                     type: 'button',
+                     id: 'exporter_regenerate_token_btn',
+                     class: 'icon icon-reload' %>
+      <em class="info"><%= t('exporter.help.token') %></em>
+    </p>
+
+    <!-- Metrics URL -->
+    <p>
+      <label><%= t('exporter.labels.metrics_url') %></label>
+      <% metrics_url = url_for(controller: 'exporter', 
+                               action: 'index', 
+                               token: @settings['exporter_prometheus_token'],
+                               only_path: false) %>
+      <%= link_to metrics_url, metrics_url, target: '_blank', class: 'external' %>
+      <em class="info"><%= t('exporter.help.metrics_url') %></em>
+    </p>
+  </div>
+
+  <!-- Prometheus Configuration Example -->
+  <div class="box tabular settings">
+    <h3><%= t('exporter.labels.prometheus_config') %></h3>
+    
+    <p>
+      <label><%= t('exporter.labels.config_example') %></label>
+      <pre style="background: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">
+scrape_configs:
+  - job_name: 'redmine'
+    scrape_interval: 60s
+    scrape_timeout: 30s
+    scheme: '<%= request.scheme %>'
+    metrics_path: '/metrics'
+    params:
+      token: ['<%= @settings['exporter_prometheus_token'] %>']
+    static_configs:
+      - targets: ['<%= request.host_with_port %>']
+        labels:
+          instance: 'redmine-production'
+          environment: 'production'</pre>
+      <em class="info"><%= t('exporter.help.prometheus_config') %></em>
+    </p>
+  </div>
+
+  <!-- Available Metrics -->
+  <div class="box tabular settings">
+    <h3><%= t('exporter.labels.available_metrics') %></h3>
+    
+    <h4><%= t('exporter.labels.system_metrics') %></h4>
+    <ul>
+      <li><code>load_average_one_minute</code> - <%= t('exporter.metrics.load_average') %></li>
+      <li><code>disk_total_bytes</code> - <%= t('exporter.metrics.disk_total') %></li>
+      <li><code>disk_used_bytes</code> - <%= t('exporter.metrics.disk_used') %></li>
+      <li><code>disk_free_bytes</code> - <%= t('exporter.metrics.disk_free') %></li>
+      <li><code>cpu_usage_percent</code> - <%= t('exporter.metrics.cpu_usage') %></li>
+      <li><code>memory_total_bytes</code> - <%= t('exporter.metrics.memory_total') %></li>
+      <li><code>memory_free_bytes</code> - <%= t('exporter.metrics.memory_free') %></li>
+      <li><code>memory_used_bytes</code> - <%= t('exporter.metrics.memory_used') %></li>
+    </ul>
+
+    <h4><%= t('exporter.labels.redmine_metrics') %></h4>
+    <ul>
+      <li><code>redmine_user_count</code> - <%= t('exporter.metrics.user_count') %></li>
+      <li><code>redmine_active_sessions_count</code> - <%= t('exporter.metrics.sessions_count') %></li>
+      <li><code>redmine_files_size_bytes</code> - <%= t('exporter.metrics.files_size') %></li>
+      <li><code>redmine_issues_count</code> - <%= t('exporter.metrics.issues_count') %></li>
+      <li><code>redmine_issues_open</code> - <%= t('exporter.metrics.issues_open') %></li>
+      <li><code>redmine_issues_closed</code> - <%= t('exporter.metrics.issues_closed') %></li>
+      <li><code>redmine_projects_active_count</code> - <%= t('exporter.metrics.projects_active_count') %></li>
+      <li><code>redmine_projects_count</code> - <%= t('exporter.metrics.projects_count') %></li>
+    </ul>
+  </div>
+
+  <%= submit_tag l(:button_apply), class: 'button-primary' %>
+<% end %>
+
+<%= javascript_tag do %>
+  document.addEventListener('DOMContentLoaded', function() {
+    const regenerateBtn = document.getElementById('exporter_regenerate_token_btn');
+    const tokenField = document.getElementById('exporter_token_field');
+    
+    regenerateBtn.addEventListener('click', function() {
+      if (!confirm('<%= j t('exporter.confirmations.regenerate_token') %>')) {
+        return;
+      }
+      
+      regenerateBtn.disabled = true;
+      regenerateBtn.textContent = '<%= j t('exporter.labels.generating') %>';
+      
+      fetch('<%= url_for(controller: 'exporter_settings', action: 'regenerate_token') %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          tokenField.value = data.token;
+          alert(data.message);
+        } else {
+          alert('<%= j t('exporter.errors.token_generation_failed') %>: ' + (data.message || ''));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('<%= j t('exporter.errors.token_generation_failed') %>');
+      })
+      .finally(() => {
+        regenerateBtn.disabled = false;
+        regenerateBtn.textContent = '<%= j t('exporter.buttons.regenerate_token') %>';
+      });
+    });
+  });
+<% end %>
+

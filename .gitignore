@@ -1,0 +1,20 @@
+# Ignore bundler files
+.bundle/
+vendor/bundle/
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+tmp/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+

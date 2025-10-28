@@ -1,19 +1,60 @@
-# English strings go here for Rails i18n
 en:
-  redexporter_label: "Redexporter"
-  redexporter:
-    settings:
-      title:
-          enabled: "Enable metrics:"
-          token: "Auth token:"
-          metrics: "Metrics:"
-          example: "Prometheus config example:"
-      description:
-          enabled: "Check if you want expose metrics."
-          token: "Required for authorization."
-          metrics: "Link on metrics for prometheus."
-      button:
-          update: "New token"
-      error:
-          disabled: "Metrics is disabled, open plugin settings for enable it."
-          unauthorised: "Token not match"
+  exporter_label: "Exporter"
+  
+  exporter:
+    labels:
+      settings_title: "Exporter Settings"
+      plugin_description: "Export Redmine and system metrics to Prometheus for monitoring"
+      general_settings: "General Settings"
+      enabled: "Enable Metrics Export"
+      token: "Authentication Token"
+      metrics_url: "Metrics URL"
+      prometheus_config: "Prometheus Configuration"
+      config_example: "Configuration Example"
+      available_metrics: "Available Metrics"
+      system_metrics: "System Metrics"
+      redmine_metrics: "Redmine Metrics"
+      view_documentation: "View Documentation"
+      generating: "Generating..."
+      
+    buttons:
+      regenerate_token: "Regenerate Token"
+      
+    help:
+      enabled: "Enable or disable metrics export. When disabled, the metrics endpoint will return an error."
+      token: "Authentication token required to access the metrics endpoint. Keep this secure."
+      metrics_url: "URL to access Prometheus metrics. Use this in your Prometheus configuration."
+      prometheus_config: "Copy this configuration to your prometheus.yml file to start scraping metrics."
+      
+    metrics:
+      load_average: "System load average (1 minute)"
+      disk_total: "Total disk space in bytes"
+      disk_used: "Used disk space in bytes"
+      disk_free: "Free disk space in bytes"
+      cpu_usage: "CPU usage percentage"
+      memory_total: "Total system memory in bytes"
+      memory_free: "Free system memory in bytes"
+      memory_used: "Used system memory in bytes"
+      user_count: "Number of active users"
+      sessions_count: "Number of active user sessions (last 5 minutes)"
+      files_size: "Total size of Redmine files directory"
+      issues_count: "Total number of issues"
+      issues_open: "Number of open issues"
+      issues_closed: "Number of closed issues"
+      projects_active_count: "Number of active projects"
+      projects_count: "Total number of projects"
+      
+    messages:
+      settings_saved: "Settings saved successfully"
+      token_regenerated: "Token regenerated successfully. Remember to update your Prometheus configuration."
+      
+    errors:
+      disabled: "Metrics export is disabled. Enable it in plugin settings."
+      unauthorized: "Invalid authentication token"
+      internal_error: "Internal server error. Check Redmine logs for details."
+      save_failed: "Failed to save settings"
+      token_generation_failed: "Failed to generate new token"
+      
+    confirmations:
+      regenerate_token: "Are you sure you want to regenerate the token? You will need to update your Prometheus configuration with the new token."
+

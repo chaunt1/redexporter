@@ -1,11 +1,15 @@
-# Plugin's routes
-# See: http://guides.rubyonrails.org/routing.html
+# frozen_string_literal: true
 
-match 'redexporter/metrics' => 'redexporter#metrics', :via => :get
+# Routes for Exporter plugin
+# Compatible with Rails 6+ routing conventions
 
-resources :redexporter_settings do
+# Metrics endpoint for Prometheus
+get 'metrics', to: 'exporter#index', as: 'exporter_metrics'
+
+# Settings routes
+resources :exporter_settings, only: [:index] do
   collection do
-    get :autocomplete_for_user
-    post :save, to: 'redexporter_settings#save'
+    post :save
+    post :regenerate_token
   end
 end

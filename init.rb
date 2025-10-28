@@ -1,29 +1,25 @@
-require 'redexporter_admin_menu_hooks'
-#require 'application_controller_patch'
+# frozen_string_literal: true
 
-require 'redexporter/redexporter'
-require 'redexporter/vmstat'
-require 'redexporter/redmine'
+# Exporter Plugin for Redmine 6.x
+# Compatible with Zeitwerk autoloader (Rails 6+)
 
-#Rails.configuration.to_prepare do
-#  ApplicationController.send(:include, ApplicationControllerPatch) unless Issue.included_modules.include? ApplicationControllerPatch
-#end
+Redmine::Plugin.register :exporter do
+  name 'Exporter Plugin'
+  author 'chaunt1'
+  description 'Exposes Redmine metrics to Prometheus for monitoring (Redmine 6.x compatible)'
+  version '1.0.0'
+  url 'https://github.com/chaunt1/redexporter'
+  author_url 'https://chaunt.dev'
 
-Redmine::Plugin.register :redexporter do
-  name 'Redexporter plugin'
-  author 'noshutdown.ru'
-  description 'Allows you expose Redmine metrics to Prometheus'
-  version '0.0.2'
-  url 'https://noshutdown.ru/redmine-plugins-redexporter/'
-  author_url 'https://noshutdown.ru/'
+  # Plugin settings with default values
+  settings default: {
+    'exporter_enabled' => false,
+    'exporter_prometheus_token' => SecureRandom.hex(16)
+  }, partial: 'settings/exporter_settings'
 
-  settings :default => {'empty' => true}, :partial => 'settings/redexporter_settings'
-
-  menu :admin_menu, :redexporter, {
-          :controller => 'redexporter_settings',
-          :action => 'index'
-       },
-       :caption => :redexporter_label,
-       :html => {:class => 'icon'}
-
+  # Add menu item in admin menu
+  menu :admin_menu, :exporter, 
+    { controller: 'exporter_settings', action: 'index' },
+    caption: :exporter_label,
+    html: { class: 'icon icon-stats' }
 end

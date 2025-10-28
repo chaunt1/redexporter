@@ -1,2 +1,3 @@
-gem 'vmstat'
-gem 'prometheus_exporter'
+# Gemfile for Exporter plugin
+gem 'vmstat', '~> 2.3'
+gem 'prometheus_exporter', '~> 2.0'
